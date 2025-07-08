@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,32 +11,7 @@
       background-color: #ffffff;
       color: #1a1a1a;
       margin: 0;
-      display: flex;
-    }
-    .sidebar {
-      width: 200px;
-      background-color: #f5f5f5;
-      padding: 1rem;
-      height: 100vh;
-      box-shadow: 2px 0 5px rgba(0,0,0,0.05);
-    }
-    .sidebar h2 {
-      font-size: 1.1rem;
-      margin-bottom: 1rem;
-    }
-    .sidebar ul {
-      list-style: none;
-      padding: 0;
-    }
-    .sidebar li {
-      margin-bottom: 0.5rem;
-      cursor: pointer;
-    }
-    .content {
-      flex-grow: 1;
       padding: 2rem;
-      display: flex;
-      flex-direction: column;
     }
     h1 {
       text-align: center;
@@ -71,26 +47,9 @@
     button:hover {
       background-color: #333;
     }
-    .filter-box {
-      text-align:center; 
-      margin-bottom: 2rem;
-    }
-    .filter-box input {
-      width: 300px;
-      padding: 0.75rem;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
     .sources {
-      max-width: 1000px;
+      max-width: 800px;
       margin: 0 auto;
-      display: grid;
-      grid-template-columns: 1fr 2fr;
-      gap: 2rem;
-    }
-    .source-list {
-      display: flex;
-      flex-direction: column;
     }
     .source {
       background: #f0f0f0;
@@ -103,20 +62,82 @@
       font-size: 0.85rem;
       color: #555;
     }
-    .date {
-      font-size: 0.8rem;
-      color: #999;
+    .filter-box {
+      text-align:center; 
+      margin-bottom: 2rem;
     }
-    .edit-title {
-      display: inline-block;
-      margin-left: 1rem;
-      font-size: 0.8rem;
-      color: #0077cc;
-      cursor: pointer;
+    .filter-box input {
+      width: 300px;
+      padding: 0.75rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
     }
   </style>
 </head>
 <body>
-  <!-- BODY CONTENT OMITTED FOR BREVITY (same as canvas above) -->
+  <h1>🐦📡 DataNest</h1>
+  <div class="tagline">Signal from the swarm — where knowledge lands.</div>
+
+  <form id="sourceForm">
+    <input type="text" id="title" placeholder="Title or short description" required />
+    <input type="url" id="link" placeholder="Link (URL or location)" required />
+    <textarea id="note" placeholder="Optional note..."></textarea>
+    <input type="text" id="tags" placeholder="Tags (comma-separated, e.g. TNFD, policy)" />
+    <button type="submit">Save Source</button>
+  </form>
+
+  <div class="filter-box">
+    <input type="text" id="filterTag" placeholder="Filter by tag..." oninput="filterSources()" />
+  </div>
+
+  <div class="sources" id="sourceList"></div>
+
+  <script>
+    const form = document.getElementById('sourceForm');
+    const list = document.getElementById('sourceList');
+    const filterTag = document.getElementById('filterTag');
+
+    let sources = JSON.parse(localStorage.getItem('sources')) || [];
+
+    function saveToStorage() {
+      localStorage.setItem('sources', JSON.stringify(sources));
+    }
+
+    function renderSources(filter = '') {
+      list.innerHTML = '';
+      sources.filter(src => {
+        return filter === '' || src.tags.some(tag => tag.toLowerCase().includes(filter.toLowerCase()));
+      }).forEach(source => {
+        const div = document.createElement('div');
+        div.className = 'source';
+        div.innerHTML = `
+          <strong><a href="${source.link}" target="_blank">${source.title}</a></strong>
+          <p>${source.note || ''}</p>
+          <div class="tags">Tags: ${source.tags.join(', ')}</div>
+        `;
+        list.appendChild(div);
+      });
+    }
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const title = document.getElementById('title').value.trim();
+      const link = document.getElementById('link').value.trim();
+      const note = document.getElementById('note').value.trim();
+      const tags = document.getElementById('tags').value.split(',').map(t => t.trim()).filter(t => t);
+
+      sources.unshift({ title, link, note, tags });
+      saveToStorage();
+      renderSources(filterTag.value);
+
+      form.reset();
+    });
+
+    function filterSources() {
+      renderSources(filterTag.value);
+    }
+
+    renderSources();
+  </script>
 </body>
 </html>
