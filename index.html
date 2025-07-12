@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,133 +10,238 @@
       background-color: #ffffff;
       color: #1a1a1a;
       margin: 0;
-      padding: 2rem;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
     }
-    h1 {
-      text-align: center;
-      margin-bottom: 0.5rem;
-      font-size: 2rem;
+    .sidebar {
+      width: 220px;
+      background-color: #f7f7f7;
+      padding: 1rem;
+      border-right: 1px solid #ddd;
     }
-    .tagline {
-      text-align: center;
-      font-size: 0.9rem;
-      color: #666;
-      margin-bottom: 2rem;
+    .sidebar h2 {
+      font-size: 1rem;
+      margin-bottom: 1rem;
     }
-    form {
-      max-width: 600px;
-      margin: 0 auto 2rem;
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+    }
+    .sidebar li {
+      margin-bottom: 0.75rem;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+    .main {
+      flex-grow: 1;
       display: flex;
       flex-direction: column;
-      gap: 1rem;
+      padding: 1rem;
+      overflow: auto;
     }
-    input, select, textarea, button {
-      padding: 0.75rem;
+    .header {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    .header h1 {
+      font-size: 1.8rem;
+      margin: 0;
+    }
+    .tagline {
+      font-size: 0.9rem;
+      color: #666;
+    }
+    form {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+    input, textarea, button {
+      padding: 0.5rem;
+      font-size: 0.9rem;
       border: 1px solid #ccc;
-      border-radius: 5px;
-      font-size: 1rem;
-      background-color: #fff;
-      color: #333;
+      border-radius: 4px;
     }
     button {
       background-color: #1a1a1a;
       color: #fff;
       cursor: pointer;
     }
-    button:hover {
-      background-color: #333;
+    .library {
+      display: flex;
+      gap: 1rem;
     }
-    .sources {
-      max-width: 800px;
-      margin: 0 auto;
+    .source-list {
+      flex: 2;
+      overflow-y: auto;
+      max-height: 70vh;
     }
     .source {
+      display: flex;
+      gap: 1rem;
       background: #f0f0f0;
+      border-radius: 6px;
       padding: 1rem;
       margin-bottom: 1rem;
-      border-radius: 5px;
     }
-    .tags {
-      margin-top: 0.5rem;
-      font-size: 0.85rem;
+    .source img {
+      width: 80px;
+      height: auto;
+      object-fit: cover;
+      border-radius: 4px;
+    }
+    .source-content {
+      flex: 1;
+    }
+    .source-content h3 {
+      margin: 0 0 0.5rem 0;
+    }
+    .source-content .link {
+      font-size: 0.8rem;
+      color: #0077cc;
+    }
+    .source-content .tags {
+      font-size: 0.8rem;
       color: #555;
     }
-    .filter-box {
-      text-align:center; 
-      margin-bottom: 2rem;
+    .source-content .date {
+      float: right;
+      font-size: 0.75rem;
+      color: #999;
     }
-    .filter-box input {
-      width: 300px;
-      padding: 0.75rem;
-      border: 1px solid #ccc;
-      border-radius: 5px;
+    .summary-pane {
+      flex: 1;
+      background: #fafafa;
+      padding: 1rem;
+      border-left: 1px solid #ddd;
+      overflow-y: auto;
     }
   </style>
 </head>
 <body>
-  <h1>🐦📡 DataNest</h1>
-  <div class="tagline">Signal from the swarm — where knowledge lands.</div>
-
-  <form id="sourceForm">
-    <input type="text" id="title" placeholder="Title or short description" required />
-    <input type="url" id="link" placeholder="Link (URL or location)" required />
-    <textarea id="note" placeholder="Optional note..."></textarea>
-    <input type="text" id="tags" placeholder="Tags (comma-separated, e.g. TNFD, policy)" />
-    <button type="submit">Save Source</button>
-  </form>
-
-  <div class="filter-box">
-    <input type="text" id="filterTag" placeholder="Filter by tag..." oninput="filterSources()" />
+  <div class="sidebar">
+    <h2>Navigation</h2>
+    <ul>
+      <li onclick="showHome()">Home</li>
+      <li onclick="showLibrary('All')">Library</li>
+      <li onclick="showLibrary('Article')">Articles</li>
+      <li onclick="showLibrary('PDF')">PDFs</li>
+      <li onclick="showLibrary('Video')">Videos</li>
+      <li onclick="showLibrary('Email')">Emails</li>
+    </ul>
   </div>
 
-  <div class="sources" id="sourceList"></div>
+  <div class="main">
+    <div class="header">
+      <h1>🐦📡 DataNest</h1>
+      <div class="tagline">Signal from the swarm — where knowledge lands.</div>
+    </div>
+
+    <form id="sourceForm">
+      <input type="url" id="link" placeholder="Paste URL here..." required onblur="autoFillTitle()">
+      <input type="text" id="title" placeholder="Title (auto-filled if possible)" required>
+      <input type="text" id="tags" placeholder="Tags (comma-separated)">
+      <button type="submit">Save</button>
+    </form>
+
+    <div class="library">
+      <div class="source-list" id="sourceList"></div>
+      <div class="summary-pane" id="summaryPane">Click a source to see summary</div>
+    </div>
+  </div>
 
   <script>
+    const sourceList = document.getElementById('sourceList');
+    const summaryPane = document.getElementById('summaryPane');
     const form = document.getElementById('sourceForm');
-    const list = document.getElementById('sourceList');
-    const filterTag = document.getElementById('filterTag');
+    let sources = JSON.parse(localStorage.getItem('sources') || '[]');
+    let currentFilter = 'All';
 
-    let sources = JSON.parse(localStorage.getItem('sources')) || [];
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      const link = document.getElementById('link').value;
+      const title = document.getElementById('title').value;
+      const tags = document.getElementById('tags').value.split(',').map(t => t.trim());
+      const type = detectType(link);
+      const date = new Date().toLocaleDateString();
+      const thumbnail = await getThumbnail(link, type);
 
-    function saveToStorage() {
+      sources.unshift({ link, title, tags, type, date, thumbnail, summary: 'Auto-summary coming soon...' });
       localStorage.setItem('sources', JSON.stringify(sources));
+      form.reset();
+      renderList();
+    };
+
+    function detectType(url) {
+      if (url.endsWith('.pdf')) return 'PDF';
+      if (url.includes('youtube.com') || url.includes('vimeo.com')) return 'Video';
+      if (url.includes('@')) return 'Email';
+      return 'Article';
     }
 
-    function renderSources(filter = '') {
-      list.innerHTML = '';
-      sources.filter(src => {
-        return filter === '' || src.tags.some(tag => tag.toLowerCase().includes(filter.toLowerCase()));
-      }).forEach(source => {
-        const div = document.createElement('div');
-        div.className = 'source';
-        div.innerHTML = `
-          <strong><a href="${source.link}" target="_blank">${source.title}</a></strong>
-          <p>${source.note || ''}</p>
-          <div class="tags">Tags: ${source.tags.join(', ')}</div>
+    async function autoFillTitle() {
+      const link = document.getElementById('link').value;
+      try {
+        const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(link)}`);
+        const data = await res.json();
+        const match = data.contents.match(/<title>(.*?)<\/title>/);
+        if (match && match[1]) {
+          document.getElementById('title').value = match[1];
+        }
+      } catch (err) {
+        console.warn('Failed to auto-fetch title', err);
+      }
+    }
+
+    async function getThumbnail(url, type) {
+      if (type !== 'PDF') return 'https://placehold.co/80x120?text=Link';
+      try {
+        const response = await fetch('https://api.pdf.co/v1/pdf/convert/to/png', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': 'florencearke@gmail.com_IhCMvqYYwcpJYzZPzSjZr70Y6SY1tuDa8qPPCvrVYEGB27ietizNsDEIrQRZD3Ow'
+          },
+          body: JSON.stringify({ url: url, pages: "1" })
+        });
+        const json = await response.json();
+        return json.url || 'https://placehold.co/80x120?text=PDF';
+      } catch {
+        return 'https://placehold.co/80x120?text=PDF';
+      }
+    }
+
+    function showHome() {
+      document.querySelector('form').style.display = 'flex';
+    }
+
+    function showLibrary(filter) {
+      currentFilter = filter;
+      renderList();
+      document.querySelector('form').style.display = 'none';
+    }
+
+    function renderList() {
+      sourceList.innerHTML = '';
+      sources.filter(s => currentFilter === 'All' || s.type === currentFilter).forEach((s, index) => {
+        const el = document.createElement('div');
+        el.className = 'source';
+        el.innerHTML = `
+          <img src="${s.thumbnail}" alt="preview">
+          <div class="source-content">
+            <h3>${s.title} <span class="date">${s.date}</span></h3>
+            <div class="link"><a href="${s.link}" target="_blank">Visit Source</a></div>
+            <div class="tags">Tags: ${s.tags.join(', ')}</div>
+          </div>
         `;
-        list.appendChild(div);
+        el.onclick = () => summaryPane.innerHTML = `<h3>${s.title}</h3><p>${s.summary}</p>`;
+        sourceList.appendChild(el);
       });
     }
 
-    form.addEventListener('submit', e => {
-      e.preventDefault();
-      const title = document.getElementById('title').value.trim();
-      const link = document.getElementById('link').value.trim();
-      const note = document.getElementById('note').value.trim();
-      const tags = document.getElementById('tags').value.split(',').map(t => t.trim()).filter(t => t);
-
-      sources.unshift({ title, link, note, tags });
-      saveToStorage();
-      renderSources(filterTag.value);
-
-      form.reset();
-    });
-
-    function filterSources() {
-      renderSources(filterTag.value);
-    }
-
-    renderSources();
+    renderList();
   </script>
 </body>
 </html>
