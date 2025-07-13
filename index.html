@@ -1,247 +1,602 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DataNest</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      background-color: #ffffff;
-      color: #1a1a1a;
-      margin: 0;
-      display: flex;
-      height: 100vh;
-      overflow: hidden;
-    }
-    .sidebar {
-      width: 220px;
-      background-color: #f7f7f7;
-      padding: 1rem;
-      border-right: 1px solid #ddd;
-    }
-    .sidebar h2 {
-      font-size: 1rem;
-      margin-bottom: 1rem;
-    }
-    .sidebar ul {
-      list-style: none;
-      padding: 0;
-    }
-    .sidebar li {
-      margin-bottom: 0.75rem;
-      cursor: pointer;
-      font-size: 0.95rem;
-    }
-    .main {
-      flex-grow: 1;
-      display: flex;
-      flex-direction: column;
-      padding: 1rem;
-      overflow: auto;
-    }
-    .header {
-      text-align: center;
-      margin-bottom: 1rem;
-    }
-    .header h1 {
-      font-size: 1.8rem;
-      margin: 0;
-    }
-    .tagline {
-      font-size: 0.9rem;
-      color: #666;
-    }
-    form {
-      display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-      margin-bottom: 1rem;
-    }
-    input, textarea, button {
-      padding: 0.5rem;
-      font-size: 0.9rem;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    button {
-      background-color: #1a1a1a;
-      color: #fff;
-      cursor: pointer;
-    }
-    .library {
-      display: flex;
-      gap: 1rem;
-    }
-    .source-list {
-      flex: 2;
-      overflow-y: auto;
-      max-height: 70vh;
-    }
-    .source {
-      display: flex;
-      gap: 1rem;
-      background: #f0f0f0;
-      border-radius: 6px;
-      padding: 1rem;
-      margin-bottom: 1rem;
-    }
-    .source img {
-      width: 80px;
-      height: auto;
-      object-fit: cover;
-      border-radius: 4px;
-    }
-    .source-content {
-      flex: 1;
-    }
-    .source-content h3 {
-      margin: 0 0 0.5rem 0;
-    }
-    .source-content .link {
-      font-size: 0.8rem;
-      color: #0077cc;
-    }
-    .source-content .tags {
-      font-size: 0.8rem;
-      color: #555;
-    }
-    .source-content .date {
-      float: right;
-      font-size: 0.75rem;
-      color: #999;
-    }
-    .summary-pane {
-      flex: 1;
-      background: #fafafa;
-      padding: 1rem;
-      border-left: 1px solid #ddd;
-      overflow-y: auto;
-    }
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DataNest</title>
+    <style>
+        :root {
+            --primary-bg: #ffffff;
+            --secondary-bg: #f7f7f7;
+            --tertiary-bg: #fafafa;
+            --border-color: #ddd;
+            --text-color: #1a1a1a;
+            --light-text: #666;
+            --lighter-text: #999;
+            --accent-color: #0077cc; /* For links */
+            --button-bg: #1a1a1a;
+            --button-text: #fff;
+            --source-card-bg: #f0f0f0;
+            --hover-light: rgba(0, 0, 0, 0.05); /* Very light grey for hover */
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* A slightly more modern font */
+            background-color: var(--primary-bg);
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 240px; /* Slightly wider sidebar */
+            background-color: var(--secondary-bg);
+            padding: 1.5rem 1rem; /* More vertical padding */
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar h2 {
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            color: var(--light-text);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex-grow: 1; /* Allows navigation to take available space */
+        }
+
+        .sidebar li {
+            margin-bottom: 0.5rem; /* Reduced margin for more items */
+            padding: 0.75rem 1rem; /* Added padding for better click area */
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: var(--text-color);
+            border-radius: 6px; /* Slightly rounded corners */
+            transition: background-color 0.2s ease;
+        }
+
+        .sidebar li:hover {
+            background-color: var(--hover-light);
+        }
+
+        .sidebar li.active {
+            background-color: var(--border-color); /* Highlight active section */
+            font-weight: bold;
+        }
+
+        .sidebar-footer {
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .main {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem;
+            overflow: hidden; /* Manage overflow within flex items */
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header h1 {
+            font-size: 2rem; /* Slightly larger title */
+            margin: 0 0 0.25rem 0;
+            color: var(--text-color);
+            font-weight: 600;
+        }
+
+        .tagline {
+            font-size: 0.85rem;
+            color: var(--light-text);
+        }
+
+        form {
+            display: flex;
+            gap: 0.75rem; /* Increased gap for better spacing */
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+            padding: 0.75rem;
+            background-color: var(--secondary-bg);
+            border-radius: 8px; /* More rounded form */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); /* Subtle shadow */
+        }
+
+        input[type="url"],
+        input[type="text"],
+        textarea {
+            flex: 1 1 250px; /* Flexible width for inputs */
+            padding: 0.75rem; /* More padding */
+            font-size: 0.95rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px; /* Match form rounding */
+            background-color: var(--primary-bg);
+            color: var(--text-color);
+        }
+
+        textarea {
+            min-height: 100px; /* For manual text input */
+            resize: vertical;
+        }
+
+        button {
+            padding: 0.75rem 1.2rem;
+            font-size: 0.95rem;
+            border: none; /* No border for buttons */
+            border-radius: 6px;
+            background-color: var(--button-bg);
+            color: var(--button-text);
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+
+        button:hover {
+            background-color: #333; /* Darker on hover */
+            transform: translateY(-1px); /* Slight lift */
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end; /* Align to the right */
+            margin-bottom: 1rem;
+        }
+
+        .library {
+            flex-grow: 1; /* Allows library to take remaining height */
+            display: flex;
+            gap: 1.5rem; /* More space between list and summary */
+            overflow: hidden; /* Ensure inner elements manage their overflow */
+        }
+
+        .source-list {
+            flex: 2; /* Still takes 2/3 of space */
+            overflow-y: auto; /* Scrollable */
+            padding-right: 0.5rem; /* For scrollbar */
+            box-sizing: border-box; /* Include padding in flex calculation */
+        }
+
+        .source {
+            display: flex;
+            gap: 1rem;
+            background: var(--source-card-bg);
+            border-radius: 8px; /* More rounded */
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08); /* Subtle shadow */
+            cursor: pointer;
+            transition: background-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .source:hover {
+            background-color: #e8e8e8; /* Slightly lighter on hover */
+            box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+        }
+
+        .source img {
+            width: 90px; /* Slightly larger thumbnail */
+            height: 100px; /* Fixed height for consistency */
+            object-fit: cover;
+            border-radius: 4px;
+            flex-shrink: 0; /* Prevent image from shrinking */
+        }
+
+        .source-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; /* Pushes meta to bottom */
+        }
+
+        .source-content h3 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.1rem;
+            line-height: 1.4;
+        }
+
+        .source-meta {
+            font-size: 0.8rem;
+            color: var(--light-text);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end; /* Align items to the bottom */
+            flex-wrap: wrap; /* Allow wrapping on small screens */
+            margin-top: 0.5rem;
+        }
+
+        .source-meta .link {
+            color: var(--accent-color);
+            text-decoration: none;
+            flex-basis: 100%; /* Link takes full width */
+            margin-bottom: 0.25rem;
+        }
+        .source-meta .link:hover {
+            text-decoration: underline;
+        }
+
+        .source-meta .tags {
+            margin-right: 1rem; /* Space between tags and date */
+            flex-grow: 1;
+        }
+
+        .source-meta .date {
+            color: var(--lighter-text);
+            white-space: nowrap; /* Prevent date from wrapping */
+        }
+
+        .novelty-score {
+            font-weight: bold;
+            color: #d9534f; /* Example color for low novelty */
+            margin-left: 0.5rem;
+        }
+        .novelty-score.high { color: #5cb85c; } /* Green for high novelty */
+        .novelty-score.medium { color: #f0ad4e; } /* Orange for medium novelty */
+        .novelty-score.low { color: #d9534f; } /* Red for low novelty */
+
+
+        .summary-pane {
+            flex: 1;
+            background: var(--tertiary-bg);
+            padding: 1.5rem;
+            border-left: 1px solid var(--border-color);
+            overflow-y: auto;
+            border-radius: 8px; /* Match other rounded elements */
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.02); /* Inner shadow */
+        }
+
+        .summary-pane h3 {
+            margin-top: 0;
+            font-size: 1.4rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .summary-pane p {
+            line-height: 1.6;
+            color: var(--text-color);
+        }
+
+        /* Modals for Add Manual Text */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1000; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: var(--primary-bg);
+            margin: auto;
+            padding: 2rem;
+            border: 1px solid var(--border-color);
+            width: 80%; /* Could be responsive */
+            max-width: 700px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            cursor: pointer;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Message Box */
+        #messageBox {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #333;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            display: none;
+            z-index: 1001;
+            font-size: 0.9rem;
+        }
+    </style>
 </head>
 <body>
-  <div class="sidebar">
-    <h2>Navigation</h2>
-    <ul>
-      <li onclick="showHome()">Home</li>
-      <li onclick="showLibrary('All')">Library</li>
-      <li onclick="showLibrary('Article')">Articles</li>
-      <li onclick="showLibrary('PDF')">PDFs</li>
-      <li onclick="showLibrary('Video')">Videos</li>
-      <li onclick="showLibrary('Email')">Emails</li>
-    </ul>
-  </div>
-
-  <div class="main">
-    <div class="header">
-      <h1>🐦📡 DataNest</h1>
-      <div class="tagline">Signal from the swarm — where knowledge lands.</div>
+    <div class="sidebar">
+        <h2>DataNest</h2>
+        <ul>
+            <li onclick="showHome()" class="active">Add Source</li>
+            <li onclick="showLibrary('All')">All Library</li>
+            <li onclick="showLibrary('Article')">Articles</li>
+            <li onclick="showLibrary('PDF')">PDFs</li>
+            <li onclick="showLibrary('Video')">Videos</li>
+            <li onclick="showLibrary('Email')">Emails</li>
+        </ul>
+        <div class="sidebar-footer">
+            <button onclick="generateBrief()">Generate Weekly Brief</button>
+        </div>
     </div>
 
-    <form id="sourceForm">
-      <input type="url" id="link" placeholder="Paste URL here..." required onblur="autoFillTitle()">
-      <input type="text" id="title" placeholder="Title (auto-filled if possible)" required>
-      <input type="text" id="tags" placeholder="Tags (comma-separated)">
-      <button type="submit">Save</button>
-    </form>
+    <div class="main">
+        <div class="header">
+            <h1>🐦📡 DataNest</h1>
+            <div class="tagline">Signal from the swarm — where knowledge lands.</div>
+        </div>
 
-    <div class="library">
-      <div class="source-list" id="sourceList"></div>
-      <div class="summary-pane" id="summaryPane">Click a source to see summary</div>
+        <form id="sourceForm">
+            <input type="url" id="link" placeholder="Paste URL here..." required>
+            <input type="text" id="title" placeholder="Title (auto-filled by backend)" required>
+            <input type="text" id="tags" placeholder="Tags (comma-separated)">
+            <button type="submit">Save Source</button>
+            <button type="button" onclick="showManualInputModal()">Add Manual Text/Transcript</button>
+        </form>
+
+        <div class="library">
+            <div class="source-list" id="sourceList"></div>
+            <div class="summary-pane" id="summaryPane">
+                <h3>Selected Source Summary</h3>
+                <p>Click a source from the list to see its detailed summary and analysis here.</p>
+                <p>Once analyzed, you'll see novelty scores and key takeaways.</p>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <script>
-    const sourceList = document.getElementById('sourceList');
-    const summaryPane = document.getElementById('summaryPane');
-    const form = document.getElementById('sourceForm');
-    let sources = JSON.parse(localStorage.getItem('sources') || '[]');
-    let currentFilter = 'All';
+    <div id="manualInputModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeManualInputModal()">&times;</span>
+            <h2>Add Manual Text/Transcript</h2>
+            <form id="manualTextForm">
+                <input type="text" id="manualTitle" placeholder="Title (e.g., Video Transcript - TNFD Update)" required>
+                <textarea id="manualContent" placeholder="Paste your text content or video transcript here..." required></textarea>
+                <input type="text" id="manualTags" placeholder="Tags (comma-separated)">
+                <button type="submit">Save Manual Text</button>
+            </form>
+        </div>
+    </div>
 
-    form.onsubmit = async (e) => {
-      e.preventDefault();
-      const link = document.getElementById('link').value;
-      const title = document.getElementById('title').value;
-      const tags = document.getElementById('tags').value.split(',').map(t => t.trim());
-      const type = detectType(link);
-      const date = new Date().toLocaleDateString();
-      const thumbnail = await getThumbnail(link, type);
+    <div id="messageBox"></div>
 
-      sources.unshift({ link, title, tags, type, date, thumbnail, summary: 'Auto-summary coming soon...' });
-      localStorage.setItem('sources', JSON.stringify(sources));
-      form.reset();
-      renderList();
-    };
+    <script>
+        const API_BASE_URL = 'http://127.0.0.1:5000'; // Flask backend URL
 
-    function detectType(url) {
-      if (url.endsWith('.pdf')) return 'PDF';
-      if (url.includes('youtube.com') || url.includes('vimeo.com')) return 'Video';
-      if (url.includes('@')) return 'Email';
-      return 'Article';
-    }
+        const sourceList = document.getElementById('sourceList');
+        const summaryPane = document.getElementById('summaryPane');
+        const sourceForm = document.getElementById('sourceForm');
+        const manualInputModal = document.getElementById('manualInputModal');
+        const manualTextForm = document.getElementById('manualTextForm');
+        const messageBox = document.getElementById('messageBox');
 
-    async function autoFillTitle() {
-      const link = document.getElementById('link').value;
-      try {
-        const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(link)}`);
-        const data = await res.json();
-        const match = data.contents.match(/<title>(.*?)<\/title>/);
-        if (match && match[1]) {
-          document.getElementById('title').value = match[1];
+        let sources = []; // This will now be loaded from the backend
+
+        // --- UI Navigation and Display ---
+
+        function showHome() {
+            document.querySelectorAll('.sidebar li').forEach(li => li.classList.remove('active'));
+            document.querySelector('.sidebar li:nth-child(2)').classList.add('active'); // Add Source button
+            sourceForm.style.display = 'flex';
+            // Optionally clear summary pane
+            summaryPane.innerHTML = `<h3>Selected Source Summary</h3><p>Click a source from the list to see its detailed summary and analysis here.</p><p>Once analyzed, you'll see novelty scores and key takeaways.</p>`;
         }
-      } catch (err) {
-        console.warn('Failed to auto-fetch title', err);
-      }
-    }
 
-    async function getThumbnail(url, type) {
-      if (type !== 'PDF') return 'https://placehold.co/80x120?text=Link';
-      try {
-        const response = await fetch('https://api.pdf.co/v1/pdf/convert/to/png', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': 'florencearke@gmail.com_IhCMvqYYwcpJYzZPzSjZr70Y6SY1tuDa8qPPCvrVYEGB27ietizNsDEIrQRZD3Ow'
-          },
-          body: JSON.stringify({ url: url, pages: "1" })
-        });
-        const json = await response.json();
-        return json.url || 'https://placehold.co/80x120?text=PDF';
-      } catch {
-        return 'https://placehold.co/80x120?text=PDF';
-      }
-    }
+        async function showLibrary(filter) {
+            document.querySelectorAll('.sidebar li').forEach(li => li.classList.remove('active'));
+            // Set active class based on filter
+            if (filter === 'All') document.querySelector('.sidebar li:nth-child(3)').classList.add('active');
+            else if (filter === 'Article') document.querySelector('.sidebar li:nth-child(4)').classList.add('active');
+            else if (filter === 'PDF') document.querySelector('.sidebar li:nth-child(5)').classList.add('active');
+            else if (filter === 'Video') document.querySelector('.sidebar li:nth-child(6)').classList.add('active');
+            else if (filter === 'Email') document.querySelector('.sidebar li:nth-child(7)').classList.add('active');
 
-    function showHome() {
-      document.querySelector('form').style.display = 'flex';
-    }
 
-    function showLibrary(filter) {
-      currentFilter = filter;
-      renderList();
-      document.querySelector('form').style.display = 'none';
-    }
+            currentFilter = filter;
+            sourceForm.style.display = 'none'; // Hide the form when showing library
 
-    function renderList() {
-      sourceList.innerHTML = '';
-      sources.filter(s => currentFilter === 'All' || s.type === currentFilter).forEach((s, index) => {
-        const el = document.createElement('div');
-        el.className = 'source';
-        el.innerHTML = `
-          <img src="${s.thumbnail}" alt="preview">
-          <div class="source-content">
-            <h3>${s.title} <span class="date">${s.date}</span></h3>
-            <div class="link"><a href="${s.link}" target="_blank">Visit Source</a></div>
-            <div class="tags">Tags: ${s.tags.join(', ')}</div>
-          </div>
-        `;
-        el.onclick = () => summaryPane.innerHTML = `<h3>${s.title}</h3><p>${s.summary}</p>`;
-        sourceList.appendChild(el);
-      });
-    }
+            // Fetch sources based on filter from backend
+            await fetchSources(filter);
+            renderList();
+        }
 
-    renderList();
-  </script>
+        async function fetchSources(filter = 'All') {
+            try {
+                showMessage('Loading sources...', 'info');
+                const response = await fetch(`${API_BASE_URL}/api/sources?type=${filter}`);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                sources = await response.json();
+                showMessage('Sources loaded.', 'success');
+            } catch (error) {
+                console.error('Error fetching sources:', error);
+                showMessage('Error loading sources.', 'error');
+                sources = []; // Clear sources on error
+            }
+        }
+
+        function renderList() {
+            sourceList.innerHTML = '';
+            // No need to filter by currentFilter here, as fetchSources already does it
+            sources.forEach((s) => {
+                const el = document.createElement('div');
+                el.className = 'source';
+                // Assign a class for novelty score for dynamic styling
+                const noveltyClass = s.novelty_score >= 0.7 ? 'high' : (s.novelty_score >= 0.4 ? 'medium' : 'low');
+
+                el.innerHTML = `
+                    <img src="${s.thumbnail || 'https://placehold.co/90x100?text=DataNest'}" alt="preview">
+                    <div class="source-content">
+                        <h3>${s.title}</h3>
+                        <div class="source-meta">
+                            <a href="${s.link}" target="_blank" class="link">Visit Source</a>
+                            <span class="tags">Tags: ${s.tags.join(', ')}</span>
+                            <span class="date">${s.date}</span>
+                            ${s.novelty_score !== undefined ? `<span class="novelty-score ${noveltyClass}">Novelty: ${Math.round(s.novelty_score * 100)}%</span>` : ''}
+                        </div>
+                    </div>
+                `;
+                el.onclick = () => showSourceSummary(s);
+                sourceList.appendChild(el);
+            });
+        }
+
+        function showSourceSummary(s) {
+            summaryPane.innerHTML = `
+                <h3>${s.title}</h3>
+                <p><strong>Type:</strong> ${s.type}</p>
+                <p><strong>Date Added:</strong> ${s.date}</p>
+                <p><strong>Link:</strong> <a href="${s.link}" target="_blank">${s.link}</a></p>
+                <p><strong>Tags:</strong> ${s.tags.join(', ')}</p>
+                ${s.novelty_score !== undefined ? `<p><strong>Novelty Score:</strong> <span class="novelty-score ${s.novelty_score >= 0.7 ? 'high' : (s.novelty_score >= 0.4 ? 'medium' : 'low')}">${Math.round(s.novelty_score * 100)}%</span></p>` : ''}
+                <h4>Summary:</h4>
+                <p>${s.summary || 'Summary not yet generated or available.'}</p>
+                ${s.ai_analysis ? `<h4>AI Analysis:</h4><p>${s.ai_analysis}</p>` : ''}
+                ${s.controversy_points ? `<h4>Controversies:</h4><ul>${s.controversy_points.map(p => `<li>${p}</li>`).join('')}</ul>` : ''}
+            `;
+        }
+
+        // --- Form Submission Handlers ---
+
+        sourceForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const link = document.getElementById('link').value;
+            const title = document.getElementById('title').value; // Will be overwritten by backend
+            const tags = document.getElementById('tags').value.split(',').map(t => t.trim()).filter(Boolean);
+
+            showMessage('Saving source...', 'info');
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/add_source`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ link, title, tags, source_type: 'url' }) // Pass type as 'url'
+                });
+
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const data = await response.json();
+                showMessage(data.message, 'success');
+                sourceForm.reset();
+                await fetchSources(currentFilter); // Refresh list
+                renderList();
+            } catch (error) {
+                console.error('Error saving source:', error);
+                showMessage(`Error saving source: ${error.message}`, 'error');
+            }
+        };
+
+        manualTextForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const title = document.getElementById('manualTitle').value;
+            const content = document.getElementById('manualContent').value;
+            const tags = document.getElementById('manualTags').value.split(',').map(t => t.trim()).filter(Boolean);
+
+            showMessage('Saving manual text...', 'info');
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/add_source`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title, content, tags, source_type: 'manual' }) // Pass type as 'manual'
+                });
+
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const data = await response.json();
+                showMessage(data.message, 'success');
+                manualTextForm.reset();
+                closeManualInputModal();
+                await fetchSources(currentFilter); // Refresh list
+                renderList();
+            } catch (error) {
+                console.error('Error saving manual text:', error);
+                showMessage(`Error saving manual text: ${error.message}`, 'error');
+            }
+        };
+
+        // --- Modal Control ---
+
+        function showManualInputModal() {
+            manualInputModal.style.display = 'flex'; // Use flex to center
+        }
+
+        function closeManualInputModal() {
+            manualInputModal.style.display = 'none';
+        }
+
+        // Close modal if clicked outside content
+        window.onclick = function(event) {
+            if (event.target == manualInputModal) {
+                closeManualInputModal();
+            }
+        }
+
+        // --- Brief Generation ---
+        async function generateBrief() {
+            showMessage('Generating weekly brief...', 'info');
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/generate_brief`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const data = await response.json();
+                if (data.brief_url) {
+                    window.open(data.brief_url, '_blank'); // Open the generated brief in a new tab
+                    showMessage('Brief generated successfully!', 'success');
+                } else {
+                    showMessage('Brief generation started. Check console for details.', 'info');
+                }
+            } catch (error) {
+                console.error('Error generating brief:', error);
+                showMessage(`Error generating brief: ${error.message}`, 'error');
+            }
+        }
+
+
+        // --- Message Box Function ---
+        let messageTimer;
+        function showMessage(message, type = 'info') {
+            messageBox.textContent = message;
+            messageBox.style.backgroundColor = type === 'success' ? '#4CAF50' : (type === 'error' ? '#f44336' : '#333');
+            messageBox.style.display = 'block';
+
+            clearTimeout(messageTimer);
+            messageTimer = setTimeout(() => {
+                messageBox.style.display = 'none';
+            }, 3000); // Hide after 3 seconds
+        }
+
+        // --- Initial Load ---
+        showLibrary('All'); // Load all sources initially
+    </script>
 </body>
 </html>
