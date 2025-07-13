@@ -1,0 +1,9 @@
+# Python
+__pycache__/
+*.pyc
+.env
+venv/
+
+# DataNest specific
+data/
+*.html # If you plan to generate HTML briefs directly in the root, otherwise skip.
