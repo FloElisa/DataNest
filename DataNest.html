@@ -4,6 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>DataNest</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         :root {
             --primary-bg: #ffffff;
@@ -13,15 +15,17 @@
             --text-color: #1a1a1a;
             --light-text: #666;
             --lighter-text: #999;
-            --accent-color: #0077cc; /* For links */
-            --button-bg: #1a1a1a;
+            --accent-color: #3498db; /* Your preferred blue */
+            --button-bg: #2c3e50; /* Your preferred dark blue */
             --button-text: #fff;
             --source-card-bg: #f0f0f0;
             --hover-light: rgba(0, 0, 0, 0.05); /* Very light grey for hover */
+            --tag-bg: #e0e0e0;
+            --tag-text: #333;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* A slightly more modern font */
+            font-family: 'Roboto', sans-serif;
             background-color: var(--primary-bg);
             color: var(--text-color);
             margin: 0;
@@ -31,52 +35,105 @@
         }
 
         .sidebar {
-            width: 240px; /* Slightly wider sidebar */
+            width: 240px;
             background-color: var(--secondary-bg);
-            padding: 1.5rem 1rem; /* More vertical padding */
+            padding: 1.5rem 1rem;
             border-right: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
+            flex-shrink: 0;
         }
 
-        .sidebar h2 {
-            font-size: 1.1rem;
+        .sidebar .app-header {
+            text-align: center;
             margin-bottom: 1.5rem;
-            color: var(--light-text);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
         }
 
-        .sidebar ul {
+        .sidebar .app-header h1 {
+            font-size: 2rem;
+            margin: 0 0 0.25rem 0;
+            color: var(--accent-color);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .sidebar .app-header h1 .icon {
+            font-size: 1.5rem;
+            color: var(--button-bg);
+        }
+
+        .sidebar .app-header .tagline {
+            font-size: 0.85rem;
+            color: var(--light-text);
+            margin-top: 0;
+        }
+
+        .sidebar-nav ul {
             list-style: none;
             padding: 0;
             margin: 0;
-            flex-grow: 1; /* Allows navigation to take available space */
+            flex-grow: 1;
         }
 
-        .sidebar li {
-            margin-bottom: 0.5rem; /* Reduced margin for more items */
-            padding: 0.75rem 1rem; /* Added padding for better click area */
+        .sidebar-nav li {
+            margin-bottom: 0.5rem;
+        }
+        .sidebar-nav a {
+            padding: 0.75rem 1rem;
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             color: var(--text-color);
-            border-radius: 6px; /* Slightly rounded corners */
-            transition: background-color 0.2s ease;
+            border-radius: 6px;
+            transition: background-color 0.2s ease, font-weight 0.2s ease;
+            display: block;
+            text-decoration: none;
+            display: flex; /* For icon alignment */
+            align-items: center;
+            gap: 10px; /* Space between icon and text */
         }
 
-        .sidebar li:hover {
+        .sidebar-nav a:hover {
             background-color: var(--hover-light);
         }
 
-        .sidebar li.active {
-            background-color: var(--border-color); /* Highlight active section */
+        .sidebar-nav a.active {
+            background-color: var(--border-color);
             font-weight: bold;
         }
 
-        .sidebar-footer {
-            margin-top: 2rem;
-            padding-top: 1rem;
-            border-top: 1px solid var(--border-color);
+        .sidebar-nav .submenu {
+            list-style: none;
+            padding-left: 20px;
+            margin-top: 5px;
+            margin-bottom: 5px;
+            display: none; /* Hidden by default */
+        }
+
+        .sidebar-nav .submenu.active {
+            display: block;
+        }
+
+        .sidebar-nav .submenu li {
+            margin-bottom: 0.3rem;
+        }
+
+        .sidebar-nav .submenu a {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            color: var(--light-text);
+            gap: 8px; /* Slightly less gap for sub-icons */
+        }
+        .sidebar-nav .submenu a:hover {
+            background-color: var(--hover-light);
+        }
+        .sidebar-nav .submenu a.active {
+            background-color: var(--border-color);
+            font-weight: bold;
         }
 
         .main {
@@ -84,174 +141,196 @@
             display: flex;
             flex-direction: column;
             padding: 1.5rem;
-            overflow: hidden; /* Manage overflow within flex items */
+            overflow: hidden;
         }
 
-        .header {
-            text-align: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid var(--border-color);
+        .content-section {
+            display: none; /* All sections hidden by default */
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        /* Only active section is shown. For library, it's flex. For others, it's block. */
+        .content-section.active {
+            display: block;
+        }
+        .content-section.library-content.active {
+             display: flex; /* Re-enable flex for library */
         }
 
-        .header h1 {
-            font-size: 2rem; /* Slightly larger title */
-            margin: 0 0 0.25rem 0;
+        h1 {
+            font-size: 2rem;
+            margin: 0 0 1rem 0;
             color: var(--text-color);
             font-weight: 600;
         }
 
-        .tagline {
-            font-size: 0.85rem;
-            color: var(--light-text);
-        }
-
-        form {
-            display: flex;
-            gap: 0.75rem; /* Increased gap for better spacing */
-            flex-wrap: wrap;
-            margin-bottom: 1.5rem;
-            padding: 0.75rem;
+        .form-container {
+            padding: 1.5rem;
             background-color: var(--secondary-bg);
-            border-radius: 8px; /* More rounded form */
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05); /* Subtle shadow */
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            margin-bottom: 1.5rem;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: var(--light-text);
+            font-size: 0.9rem;
         }
 
         input[type="url"],
         input[type="text"],
         textarea {
-            flex: 1 1 250px; /* Flexible width for inputs */
-            padding: 0.75rem; /* More padding */
+            width: calc(100% - 24px);
+            padding: 12px;
             font-size: 0.95rem;
             border: 1px solid var(--border-color);
-            border-radius: 6px; /* Match form rounding */
+            border-radius: 6px;
             background-color: var(--primary-bg);
             color: var(--text-color);
+            box-sizing: border-box;
         }
 
         textarea {
-            min-height: 100px; /* For manual text input */
+            min-height: 120px;
             resize: vertical;
         }
 
         button {
             padding: 0.75rem 1.2rem;
             font-size: 0.95rem;
-            border: none; /* No border for buttons */
+            border: none;
             border-radius: 6px;
             background-color: var(--button-bg);
             color: var(--button-text);
             cursor: pointer;
             transition: background-color 0.2s ease, transform 0.1s ease;
+            margin-right: 0.5rem;
         }
 
         button:hover {
-            background-color: #333; /* Darker on hover */
-            transform: translateY(-1px); /* Slight lift */
+            background-color: #34495e;
+            transform: translateY(-1px);
         }
 
         button:active {
             transform: translateY(0);
         }
 
-        .action-buttons {
+        .library-content {
             display: flex;
-            gap: 1rem;
-            justify-content: flex-end; /* Align to the right */
-            margin-bottom: 1rem;
-        }
-
-        .library {
-            flex-grow: 1; /* Allows library to take remaining height */
-            display: flex;
-            gap: 1.5rem; /* More space between list and summary */
-            overflow: hidden; /* Ensure inner elements manage their overflow */
+            gap: 1.5rem;
+            flex-grow: 1;
+            overflow: hidden;
         }
 
         .source-list {
-            flex: 2; /* Still takes 2/3 of space */
-            overflow-y: auto; /* Scrollable */
-            padding-right: 0.5rem; /* For scrollbar */
-            box-sizing: border-box; /* Include padding in flex calculation */
+            flex: 2;
+            overflow-y: auto;
+            padding-right: 0.5rem;
         }
 
-        .source {
+        .source-card {
             display: flex;
             gap: 1rem;
             background: var(--source-card-bg);
-            border-radius: 8px; /* More rounded */
+            border-radius: 8px;
             padding: 1rem;
             margin-bottom: 1rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08); /* Subtle shadow */
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
             cursor: pointer;
             transition: background-color 0.2s ease, box-shadow 0.2s ease;
+            position: relative;
         }
 
-        .source:hover {
-            background-color: #e8e8e8; /* Slightly lighter on hover */
+        .source-card:hover {
+            background-color: #e8e8e8;
             box-shadow: 0 3px 8px rgba(0,0,0,0.12);
         }
 
-        .source img {
-            width: 90px; /* Slightly larger thumbnail */
-            height: 100px; /* Fixed height for consistency */
+        .source-card img {
+            width: 90px;
+            height: 100px;
             object-fit: cover;
             border-radius: 4px;
-            flex-shrink: 0; /* Prevent image from shrinking */
+            flex-shrink: 0;
         }
 
-        .source-content {
+        .source-content-area {
             flex: 1;
             display: flex;
             flex-direction: column;
-            justify-content: space-between; /* Pushes meta to bottom */
+            justify-content: space-between;
         }
 
-        .source-content h3 {
+        .source-content-area h3 {
             margin: 0 0 0.5rem 0;
-            font-size: 1.1rem;
+            font-size: 1.15rem;
             line-height: 1.4;
+            color: var(--text-color);
         }
 
         .source-meta {
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             color: var(--light-text);
             display: flex;
             justify-content: space-between;
-            align-items: flex-end; /* Align items to the bottom */
-            flex-wrap: wrap; /* Allow wrapping on small screens */
+            align-items: flex-end;
+            flex-wrap: wrap;
             margin-top: 0.5rem;
         }
 
         .source-meta .link {
             color: var(--accent-color);
             text-decoration: none;
-            flex-basis: 100%; /* Link takes full width */
-            margin-bottom: 0.25rem;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            display: block;
         }
         .source-meta .link:hover {
             text-decoration: underline;
         }
 
-        .source-meta .tags {
-            margin-right: 1rem; /* Space between tags and date */
-            flex-grow: 1;
-        }
-
         .source-meta .date {
             color: var(--lighter-text);
-            white-space: nowrap; /* Prevent date from wrapping */
+            white-space: nowrap;
         }
 
         .novelty-score {
             font-weight: bold;
-            color: #d9534f; /* Example color for low novelty */
-            margin-left: 0.5rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            display: inline-block;
+            margin-left: 10px;
         }
-        .novelty-score.high { color: #5cb85c; } /* Green for high novelty */
-        .novelty-score.medium { color: #f0ad4e; } /* Orange for medium novelty */
-        .novelty-score.low { color: #d9534f; } /* Red for low novelty */
+        .novelty-score.high { background-color: #d4edda; color: #155724; }
+        .novelty-score.medium { background-color: #fff3cd; color: #856404; }
+        .novelty-score.low { background-color: #f8d7da; color: #721c24; }
 
+        .source-tags {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            max-width: calc(100% - 100px);
+        }
+        .tag {
+            background-color: var(--tag-bg);
+            color: var(--tag-text);
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            white-space: nowrap;
+        }
 
         .summary-pane {
             flex: 1;
@@ -259,8 +338,8 @@
             padding: 1.5rem;
             border-left: 1px solid var(--border-color);
             overflow-y: auto;
-            border-radius: 8px; /* Match other rounded elements */
-            box-shadow: inset 0 0 5px rgba(0,0,0,0.02); /* Inner shadow */
+            border-radius: 8px;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.02);
         }
 
         .summary-pane h3 {
@@ -276,51 +355,6 @@
             color: var(--text-color);
         }
 
-        /* Modals for Add Manual Text */
-        .modal {
-            display: none; /* Hidden by default */
-            position: fixed; /* Stay in place */
-            z-index: 1000; /* Sit on top */
-            left: 0;
-            top: 0;
-            width: 100%; /* Full width */
-            height: 100%; /* Full height */
-            overflow: auto; /* Enable scroll if needed */
-            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-content {
-            background-color: var(--primary-bg);
-            margin: auto;
-            padding: 2rem;
-            border: 1px solid var(--border-color);
-            width: 80%; /* Could be responsive */
-            max-width: 700px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            position: relative;
-        }
-
-        .close-button {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            position: absolute;
-            top: 10px;
-            right: 15px;
-            cursor: pointer;
-        }
-
-        .close-button:hover,
-        .close-button:focus {
-            color: #000;
-            text-decoration: none;
-            cursor: pointer;
-        }
-
         /* Message Box */
         #messageBox {
             position: fixed;
@@ -334,269 +368,480 @@
             z-index: 1001;
             font-size: 0.9rem;
         }
+        #messageBox.success { background-color: #4CAF50; }
+        #messageBox.error { background-color: #f44336; }
+        #messageBox.info { background-color: #333; }
+
+
+        /* Bedrock Section Specifics */
+        .bedrock-content-textarea,
+        .ai-analysis-textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+            min-height: 300px;
+            resize: vertical;
+        }
     </style>
 </head>
 <body>
     <div class="sidebar">
-        <h2>DataNest</h2>
-        <ul>
-            <li onclick="showHome()" class="active">Add Source</li>
-            <li onclick="showLibrary('All')">All Library</li>
-            <li onclick="showLibrary('Article')">Articles</li>
-            <li onclick="showLibrary('PDF')">PDFs</li>
-            <li onclick="showLibrary('Video')">Videos</li>
-            <li onclick="showLibrary('Email')">Emails</li>
-        </ul>
-        <div class="sidebar-footer">
-            <button onclick="generateBrief()">Generate Weekly Brief</button>
+        <div class="app-header">
+            <h1><span class="icon">🐦</span><span class="icon">📡</span> DataNest</h1>
+            <div class="tagline">Signal from the swarm — where knowledge lands.</div>
         </div>
+        <nav class="sidebar-nav">
+            <ul>
+                <li><a href="#" id="addSourceLink" class="active"><i class="fas fa-plus-circle"></i> Add Source</a></li>
+                <li>
+                    <a href="#" id="allLibraryLink"><i class="fas fa-book"></i> All Library <i class="fas fa-chevron-down" style="float:right; font-size:0.7em; margin-top:5px;"></i></a>
+                    <ul class="submenu" id="allLibrarySubmenu">
+                        <li><a href="#" data-source-type="all"><i class="fas fa-list"></i> All Items</a></li>
+                        <li><a href="#" data-source-type="url"><i class="fas fa-link"></i> Web Articles</a></li>
+                        <li><a href="#" data-source-type="manual"><i class="fas fa-file-alt"></i> Manual Entries</a></li>
+                        <li><a href="#" data-source-type="pdf"><i class="fas fa-file-pdf"></i> PDFs</a></li>
+                        <li><a href="#" data-source-type="video"><i class="fas fa-video"></i> Videos</a></li>
+                        <li><a href="#" data-source-type="email"><i class="fas fa-envelope"></i> Emails</a></li>
+                    </ul>
+                </li>
+                <li><a href="#" id="briefLink"><i class="fas fa-newspaper"></i> Weekly Brief</a></li>
+                <li><a href="#" id="aiAnalysisLink"><i class="fas fa-brain"></i> AI Analysis</a></li>
+                <li><a href="#" id="bedrockLink"><i class="fas fa-gem"></i> Bedrock Knowledge</a></li>
+            </ul>
+        </nav>
     </div>
 
     <div class="main">
-        <div class="header">
-            <h1>🐦📡 DataNest</h1>
-            <div class="tagline">Signal from the swarm — where knowledge lands.</div>
+        <div id="addSourceSection" class="content-section active">
+            <h1>Add New Source</h1>
+            <div class="form-container">
+                <div class="form-group">
+                    <label for="urlInput">Enter URL:</label>
+                    <input type="url" id="urlInput" placeholder="e.g., https://example.com/article">
+                </div>
+                <div class="form-group">
+                    <label for="textInput">Or paste text directly:</label>
+                    <textarea id="textInput" placeholder="Paste your article text here..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="tagsInput">Tags (comma-separated):</label>
+                    <input type="text" id="tagsInput" placeholder="e.g., AI, Biodiversity, Finance">
+                </div>
+                <button onclick="saveSource()">Save Source</button>
+            </div>
         </div>
 
-        <form id="sourceForm">
-            <input type="url" id="link" placeholder="Paste URL here..." required>
-            <input type="text" id="title" placeholder="Title (auto-filled by backend)" required>
-            <input type="text" id="tags" placeholder="Tags (comma-separated)">
-            <button type="submit">Save Source</button>
-            <button type="button" onclick="showManualInputModal()">Add Manual Text/Transcript</button>
-        </form>
-
-        <div class="library">
-            <div class="source-list" id="sourceList"></div>
+        <div id="allLibrarySection" class="content-section library-content">
+            <div class="source-list" id="sourceList">
+                <h1>All Library Sources</h1>
+                <p>Loading sources...</p>
+                </div>
             <div class="summary-pane" id="summaryPane">
                 <h3>Selected Source Summary</h3>
                 <p>Click a source from the list to see its detailed summary and analysis here.</p>
                 <p>Once analyzed, you'll see novelty scores and key takeaways.</p>
             </div>
         </div>
-    </div>
 
-    <div id="manualInputModal" class="modal">
-        <div class="modal-content">
-            <span class="close-button" onclick="closeManualInputModal()">&times;</span>
-            <h2>Add Manual Text/Transcript</h2>
-            <form id="manualTextForm">
-                <input type="text" id="manualTitle" placeholder="Title (e.g., Video Transcript - TNFD Update)" required>
-                <textarea id="manualContent" placeholder="Paste your text content or video transcript here..." required></textarea>
-                <input type="text" id="manualTags" placeholder="Tags (comma-separated)">
-                <button type="submit">Save Manual Text</button>
-            </form>
+        <div id="briefSection" class="content-section">
+            <h1>Weekly Intelligence Brief</h1>
+            <p>Click the button to generate your latest intelligence brief based on the current data and bedrock knowledge.</p>
+            <button onclick="generateBrief()">Generate Weekly Brief</button>
+            <div id="briefOutput" class="summary-pane" style="margin-top: 20px; display:none;"></div>
+        </div>
+
+        <div id="aiAnalysisSection" class="content-section">
+            <h1>AI Analysis & Configuration</h1>
+            <p>This section will allow you to interact directly with the AI model (e.g., Gemini) for ad-hoc analysis, and configure API keys or model parameters.</p>
+            <div class="form-container">
+                <div class="form-group">
+                    <label for="aiPromptInput">Enter your prompt for AI analysis:</label>
+                    <textarea id="aiPromptInput" class="ai-analysis-textarea" placeholder="e.g., Summarize the key trends from my last 5 articles."></textarea>
+                </div>
+                <button onclick="runAiAnalysis()">Run AI Analysis</button>
+                <div class="form-group" style="margin-top: 20px;">
+                    <label for="geminiApiKey">Gemini API Key (Optional, for direct use):</label>
+                    <input type="text" id="geminiApiKey" placeholder="sk-YOUR_GEMINI_API_KEY">
+                </div>
+                <div id="aiAnalysisOutput" class="summary-pane" style="margin-top: 20px; display: none;">
+                    <h3>AI Analysis Results:</h3>
+                    <p>Results will appear here...</p>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="bedrockSection" class="content-section">
+            <h1>Bedrock Knowledge Base</h1>
+            <p>Manage the foundational knowledge that your AI will use for analysis. This content helps filter and focus the generated briefs.</p>
+            <div class="form-group">
+                <label for="bedrockContentInput">Edit Bedrock Content:</label>
+                <textarea id="bedrockContentInput" class="bedrock-content-textarea" placeholder="Paste your core, foundational knowledge here..."></textarea>
+            </div>
+            <button onclick="saveBedrockContent()">Save Bedrock Content</button>
         </div>
     </div>
 
     <div id="messageBox"></div>
 
     <script>
-        const API_BASE_URL = 'http://127.0.0.1:5000'; // Flask backend URL
+        const API_BASE_URL = ''; // Flask serves from root, so relative path is fine.
 
-        const sourceList = document.getElementById('sourceList');
-        const summaryPane = document.getElementById('summaryPane');
-        const sourceForm = document.getElementById('sourceForm');
-        const manualInputModal = document.getElementById('manualInputModal');
-        const manualTextForm = document.getElementById('manualTextForm');
-        const messageBox = document.getElementById('messageBox');
+        // --- Navigation Logic ---
+        document.getElementById('addSourceLink').addEventListener('click', function() { showSection('addSourceSection', this); });
 
-        let sources = []; // This will now be loaded from the backend
+        // Toggle "All Library" submenu and show main library section
+        document.getElementById('allLibraryLink').addEventListener('click', function(event) {
+            event.preventDefault(); // Prevent default link behavior for the main "All Library" link
+            const submenu = document.getElementById('allLibrarySubmenu');
+            const isActive = submenu.classList.contains('active');
 
-        // --- UI Navigation and Display ---
+            // Hide all submenus first
+            document.querySelectorAll('.sidebar-nav .submenu').forEach(sub => sub.classList.remove('active'));
 
-        function showHome() {
-            document.querySelectorAll('.sidebar li').forEach(li => li.classList.remove('active'));
-            document.querySelector('.sidebar li:nth-child(2)').classList.add('active'); // Add Source button
-            sourceForm.style.display = 'flex';
-            // Optionally clear summary pane
-            summaryPane.innerHTML = `<h3>Selected Source Summary</h3><p>Click a source from the list to see its detailed summary and analysis here.</p><p>Once analyzed, you'll see novelty scores and key takeaways.</p>`;
-        }
-
-        async function showLibrary(filter) {
-            document.querySelectorAll('.sidebar li').forEach(li => li.classList.remove('active'));
-            // Set active class based on filter
-            if (filter === 'All') document.querySelector('.sidebar li:nth-child(3)').classList.add('active');
-            else if (filter === 'Article') document.querySelector('.sidebar li:nth-child(4)').classList.add('active');
-            else if (filter === 'PDF') document.querySelector('.sidebar li:nth-child(5)').classList.add('active');
-            else if (filter === 'Video') document.querySelector('.sidebar li:nth-child(6)').classList.add('active');
-            else if (filter === 'Email') document.querySelector('.sidebar li:nth-child(7)').classList.add('active');
-
-
-            currentFilter = filter;
-            sourceForm.style.display = 'none'; // Hide the form when showing library
-
-            // Fetch sources based on filter from backend
-            await fetchSources(filter);
-            renderList();
-        }
-
-        async function fetchSources(filter = 'All') {
-            try {
-                showMessage('Loading sources...', 'info');
-                const response = await fetch(`${API_BASE_URL}/api/sources?type=${filter}`);
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                sources = await response.json();
-                showMessage('Sources loaded.', 'success');
-            } catch (error) {
-                console.error('Error fetching sources:', error);
-                showMessage('Error loading sources.', 'error');
-                sources = []; // Clear sources on error
+            // If it was already active, just deactivate it, otherwise activate and show section
+            if (!isActive) {
+                submenu.classList.add('active'); // Show submenu
+                showSection('allLibrarySection', this); // Show the main library section
+                loadSources('all'); // Load all sources by default when parent is clicked
+                // Ensure 'All Items' is highlighted
+                document.querySelectorAll('#allLibrarySubmenu a').forEach(subLink => subLink.classList.remove('active'));
+                document.querySelector('#allLibrarySubmenu a[data-source-type="all"]').classList.add('active');
+            } else {
+                // If clicked again and it was active, just toggle the menu but keep the library section visible
+                // unless another main link is clicked.
+                // For simplicity now, we'll just toggle the menu.
             }
-        }
+        });
 
-        function renderList() {
-            sourceList.innerHTML = '';
-            // No need to filter by currentFilter here, as fetchSources already does it
-            sources.forEach((s) => {
-                const el = document.createElement('div');
-                el.className = 'source';
-                // Assign a class for novelty score for dynamic styling
-                const noveltyClass = s.novelty_score >= 0.7 ? 'high' : (s.novelty_score >= 0.4 ? 'medium' : 'low');
-
-                el.innerHTML = `
-                    <img src="${s.thumbnail || 'https://placehold.co/90x100?text=DataNest'}" alt="preview">
-                    <div class="source-content">
-                        <h3>${s.title}</h3>
-                        <div class="source-meta">
-                            <a href="${s.link}" target="_blank" class="link">Visit Source</a>
-                            <span class="tags">Tags: ${s.tags.join(', ')}</span>
-                            <span class="date">${s.date}</span>
-                            ${s.novelty_score !== undefined ? `<span class="novelty-score ${noveltyClass}">Novelty: ${Math.round(s.novelty_score * 100)}%</span>` : ''}
-                        </div>
-                    </div>
-                `;
-                el.onclick = () => showSourceSummary(s);
-                sourceList.appendChild(el);
+        // Event listeners for submenu items
+        document.querySelectorAll('#allLibrarySubmenu a').forEach(link => {
+            link.addEventListener('click', function(event) {
+                event.preventDefault(); // Prevent default link behavior
+                const sourceType = this.dataset.sourceType; // Get the data-source-type attribute
+                loadSources(sourceType); // Load sources based on type
+                // Deactivate all submenu links and activate the clicked one
+                document.querySelectorAll('#allLibrarySubmenu a').forEach(subLink => subLink.classList.remove('active'));
+                this.classList.add('active');
+                // Also activate the parent "All Library" link
+                document.getElementById('allLibraryLink').classList.add('active');
+                // Ensure main library section is visible
+                showSection('allLibrarySection', document.getElementById('allLibraryLink'));
             });
-        }
+        });
 
-        function showSourceSummary(s) {
-            summaryPane.innerHTML = `
-                <h3>${s.title}</h3>
-                <p><strong>Type:</strong> ${s.type}</p>
-                <p><strong>Date Added:</strong> ${s.date}</p>
-                <p><strong>Link:</strong> <a href="${s.link}" target="_blank">${s.link}</a></p>
-                <p><strong>Tags:</strong> ${s.tags.join(', ')}</p>
-                ${s.novelty_score !== undefined ? `<p><strong>Novelty Score:</strong> <span class="novelty-score ${s.novelty_score >= 0.7 ? 'high' : (s.novelty_score >= 0.4 ? 'medium' : 'low')}">${Math.round(s.novelty_score * 100)}%</span></p>` : ''}
-                <h4>Summary:</h4>
-                <p>${s.summary || 'Summary not yet generated or available.'}</p>
-                ${s.ai_analysis ? `<h4>AI Analysis:</h4><p>${s.ai_analysis}</p>` : ''}
-                ${s.controversy_points ? `<h4>Controversies:</h4><ul>${s.controversy_points.map(p => `<li>${p}</li>`).join('')}</ul>` : ''}
-            `;
-        }
+        document.getElementById('briefLink').addEventListener('click', function() { showSection('briefSection', this); });
+        document.getElementById('aiAnalysisLink').addEventListener('click', function() { showSection('aiAnalysisSection', this); });
+        document.getElementById('bedrockLink').addEventListener('click', function() { showSection('bedrockSection', this); loadBedrockContent(); });
 
-        // --- Form Submission Handlers ---
-
-        sourceForm.onsubmit = async (e) => {
-            e.preventDefault();
-            const link = document.getElementById('link').value;
-            const title = document.getElementById('title').value; // Will be overwritten by backend
-            const tags = document.getElementById('tags').value.split(',').map(t => t.trim()).filter(Boolean);
-
-            showMessage('Saving source...', 'info');
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/add_source`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ link, title, tags, source_type: 'url' }) // Pass type as 'url'
-                });
-
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                const data = await response.json();
-                showMessage(data.message, 'success');
-                sourceForm.reset();
-                await fetchSources(currentFilter); // Refresh list
-                renderList();
-            } catch (error) {
-                console.error('Error saving source:', error);
-                showMessage(`Error saving source: ${error.message}`, 'error');
-            }
-        };
-
-        manualTextForm.onsubmit = async (e) => {
-            e.preventDefault();
-            const title = document.getElementById('manualTitle').value;
-            const content = document.getElementById('manualContent').value;
-            const tags = document.getElementById('manualTags').value.split(',').map(t => t.trim()).filter(Boolean);
-
-            showMessage('Saving manual text...', 'info');
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/add_source`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ title, content, tags, source_type: 'manual' }) // Pass type as 'manual'
-                });
-
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                const data = await response.json();
-                showMessage(data.message, 'success');
-                manualTextForm.reset();
-                closeManualInputModal();
-                await fetchSources(currentFilter); // Refresh list
-                renderList();
-            } catch (error) {
-                console.error('Error saving manual text:', error);
-                showMessage(`Error saving manual text: ${error.message}`, 'error');
-            }
-        };
-
-        // --- Modal Control ---
-
-        function showManualInputModal() {
-            manualInputModal.style.display = 'flex'; // Use flex to center
-        }
-
-        function closeManualInputModal() {
-            manualInputModal.style.display = 'none';
-        }
-
-        // Close modal if clicked outside content
-        window.onclick = function(event) {
-            if (event.target == manualInputModal) {
-                closeManualInputModal();
-            }
-        }
-
-        // --- Brief Generation ---
-        async function generateBrief() {
-            showMessage('Generating weekly brief...', 'info');
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/generate_brief`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                const data = await response.json();
-                if (data.brief_url) {
-                    window.open(data.brief_url, '_blank'); // Open the generated brief in a new tab
-                    showMessage('Brief generated successfully!', 'success');
+        function showSection(sectionId, clickedLink) {
+            // Hide all content sections
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            // Show the target section
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) {
+                // Determine display type based on sectionId or a class
+                if (sectionId === 'allLibrarySection') {
+                    targetSection.classList.add('active'); // Will be flex due to .library-content
                 } else {
-                    showMessage('Brief generation started. Check console for details.', 'info');
+                    targetSection.classList.add('active'); // Will be block by default
                 }
-            } catch (error) {
-                console.error('Error generating brief:', error);
-                showMessage(`Error generating brief: ${error.message}`, 'error');
+            }
+
+            // Deactivate all main sidebar links
+            document.querySelectorAll('.sidebar-nav > ul > li > a').forEach(link => {
+                link.classList.remove('active');
+            });
+            // Deactivate all submenu links if not 'All Library' related
+            if (sectionId !== 'allLibrarySection') {
+                 document.querySelectorAll('.sidebar-nav .submenu').forEach(sub => sub.classList.remove('active'));
+                 document.querySelectorAll('.sidebar-nav .submenu a').forEach(subLink => subLink.classList.remove('active'));
+            }
+
+
+            // Activate the clicked main link
+            if (clickedLink) {
+                clickedLink.classList.add('active');
+            }
+
+            // If "All Library" is clicked directly, ensure its submenu is visible and 'All Items' is active
+            if (sectionId === 'allLibrarySection' && (!clickedLink || clickedLink.id === 'allLibraryLink')) {
+                document.getElementById('allLibrarySubmenu').classList.add('active');
+                document.querySelector('#allLibrarySubmenu a[data-source-type="all"]').classList.add('active');
             }
         }
 
-
-        // --- Message Box Function ---
+        // --- Message Display Utility ---
         let messageTimer;
-        function showMessage(message, type = 'info') {
+        function displayMessage(message, type = 'info') {
+            const messageBox = document.getElementById('messageBox');
             messageBox.textContent = message;
-            messageBox.style.backgroundColor = type === 'success' ? '#4CAF50' : (type === 'error' ? '#f44336' : '#333');
+            messageBox.className = `messageBox ${type}`;
             messageBox.style.display = 'block';
-
             clearTimeout(messageTimer);
             messageTimer = setTimeout(() => {
                 messageBox.style.display = 'none';
-            }, 3000); // Hide after 3 seconds
+            }, 3000);
+        }
+
+        // --- Save Source (URL/Text) ---
+        async function saveSource() {
+            const url = document.getElementById('urlInput').value;
+            const text = document.getElementById('textInput').value;
+            const tags = document.getElementById('tagsInput').value.split(',').map(t => t.trim()).filter(Boolean);
+
+            if (!url && !text) {
+                displayMessage('Please enter a URL or paste text content.', 'error');
+                return;
+            }
+
+            displayMessage('Saving source...', 'info');
+
+            try {
+                const payload = { tags: tags };
+                let endpoint = '';
+
+                if (url) {
+                    payload.url = url;
+                    endpoint = '/api/save_url_source';
+                } else {
+                    payload.content = text;
+                    endpoint = '/api/save_text_source';
+                }
+
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    displayMessage(data.message, 'success');
+                    document.getElementById('urlInput').value = '';
+                    document.getElementById('textInput').value = '';
+                    document.getElementById('tagsInput').value = '';
+                } else {
+                    displayMessage(`Error: ${data.error || 'Failed to save source.'}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error saving source:', error);
+                displayMessage(`Network Error: ${error.message}`, 'error');
+            }
+        }
+
+        // --- Load Sources for Library (with type filter) ---
+        async function loadSources(filterType = 'all') {
+            const sourceListDiv = document.getElementById('sourceList');
+            // Clear current content, keep title logic for filter type
+            sourceListDiv.innerHTML = `<h1>All Library Sources (${filterType === 'all' ? 'All Items' : filterType.charAt(0).toUpperCase() + filterType.slice(1) + 's'})</h1><p>Loading sources...</p>`;
+
+            try {
+                const response = await fetch('/api/sources');
+                const sources = await response.json();
+
+                sourceListDiv.innerHTML = `<h1>All Library Sources (${filterType === 'all' ? 'All Items' : filterType.charAt(0).toUpperCase() + filterType.slice(1) + 's'})</h1>`;
+
+                const filteredSources = sources.filter(source => {
+                    if (filterType === 'all') return true;
+
+                    // Current backend 'source_type' is 'url' or 'manual'
+                    if (filterType === 'url' && source.source_type === 'url') return true;
+                    if (filterType === 'manual' && source.source_type === 'manual') return true;
+
+                    // --- PLACEHOLDER FOR ADVANCED FILTERING ---
+                    // For 'pdf', 'video', 'email', the backend's `source_type` or new `source_format`
+                    // field would need to be updated during saving.
+                    // For now, this is client-side "guessing" based on URL extension or tags.
+                    if (filterType === 'pdf') {
+                        return source.source_url && source.source_url.toLowerCase().endsWith('.pdf');
+                    }
+                    if (filterType === 'video') {
+                        return source.source_url && (source.source_url.includes('youtube.com') || source.source_url.includes('vimeo.com'));
+                    }
+                    if (filterType === 'email') {
+                        // Assuming manual entries tagged 'email' could be emails
+                        return source.source_type === 'manual' && source.tags && source.tags.includes('email');
+                    }
+
+                    return false;
+                });
+
+
+                if (filteredSources.length === 0) {
+                    sourceListDiv.innerHTML += `<p>No ${filterType === 'all' ? '' : filterType + ' '}sources found.</p>`;
+                    return;
+                }
+
+                filteredSources.forEach(source => {
+                    const el = document.createElement('div');
+                    el.className = 'source-card';
+                    const noveltyClass = source.novelty_score !== undefined ? (source.novelty_score >= 0.7 ? 'high' : (source.novelty_score >= 0.4 ? 'medium' : 'low')) : '';
+                    const displayNovelty = source.novelty_score !== undefined ? `<span class="novelty-score ${noveltyClass}">Insight: ${Math.round(source.novelty_score * 100)}%</span>` : '';
+
+                    const tagsHtml = source.tags && source.tags.length > 0
+                        ? `<div class="source-tags">${source.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}</div>`
+                        : '';
+
+                    el.innerHTML = `
+                        <img src="${source.thumbnail || 'https://placehold.co/90x100?text=DataNest'}" alt="preview">
+                        <div class="source-content-area">
+                            <h3>${source.title || 'Untitled Source'}</h3>
+                            <div class="source-meta">
+                                <span class="date">${new Date(source.date_added).toLocaleDateString()}</span>
+                                ${displayNovelty}
+                            </div>
+                            <a href="${source.source_url || '#'}" target="_blank" class="link">Visit Source</a>
+                        </div>
+                        ${tagsHtml}
+                    `;
+                    el.onclick = () => showSourceSummary(source);
+                    sourceListDiv.appendChild(el);
+                });
+            } catch (error) {
+                console.error('Error loading sources:', error);
+                sourceListDiv.innerHTML = `<h1>All Library Sources (${filterType === 'all' ? 'All Items' : filterType.charAt(0).toUpperCase() + filterType.slice(1) + 's'})</h1><p class="message error">Error loading sources.</p>`;
+            }
+        }
+
+        // --- Show Source Summary ---
+        function showSourceSummary(source) {
+            const summaryPane = document.getElementById('summaryPane');
+            summaryPane.innerHTML = `
+                <h3>${source.title || 'Untitled Source'}</h3>
+                <p><strong>Type:</strong> ${source.source_type}</p>
+                <p><strong>Date Added:</strong> ${new Date(source.date_added).toLocaleDateString()}</p>
+                ${source.source_url ? `<p><strong>Link:</strong> <a href="${source.source_url}" target="_blank">${source.source_url}</a></p>` : ''}
+                ${source.tags && source.tags.length > 0 ? `<p><strong>Tags:</strong> ${source.tags.join(', ')}</p>` : ''}
+                ${source.novelty_score !== undefined ? `<p><strong>Insight Score:</strong> <span class="novelty-score ${source.novelty_score >= 0.7 ? 'high' : (source.novelty_score >= 0.4 ? 'medium' : 'low')}">${Math.round(source.novelty_score * 100)}%</span></p>` : ''}
+                <h4>Summary:</h4>
+                <p>${source.summary || 'Summary not yet generated or available.'}</p>
+                ${source.ai_analysis ? `<h4>AI Analysis:</h4><p>${source.ai_analysis}</p>` : ''}
+            `;
+        }
+
+        // --- Generate Brief ---
+        async function generateBrief() {
+            const briefOutput = document.getElementById('briefOutput');
+            briefOutput.style.display = 'block';
+            briefOutput.textContent = 'Generating brief... This might take a moment. Please do not close this window.';
+            displayMessage('Generating brief...', 'info');
+
+            try {
+                const response = await fetch('/api/generate_brief', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    displayMessage(data.message, 'success');
+                    briefOutput.textContent = data.brief_content;
+                } else {
+                    displayMessage(`Error: ${data.error || 'Failed to generate brief.'}`, 'error');
+                    briefOutput.textContent = `Failed to generate brief: ${data.error || 'Unknown error'}`;
+                }
+            } catch (error) {
+                console.error('Error generating brief:', error);
+                displayMessage(`Network Error: ${error.message}`, 'error');
+                briefOutput.textContent = `Network Error: ${error.message}`;
+            }
+        }
+
+        // --- Run AI Analysis (new function for AI Analysis page) ---
+        async function runAiAnalysis() {
+            const prompt = document.getElementById('aiPromptInput').value;
+            const apiKey = document.getElementById('geminiApiKey').value; // This key should ideally be sent to backend securely or stored in .env on server
+            const aiAnalysisOutput = document.getElementById('aiAnalysisOutput');
+
+            if (!prompt) {
+                displayMessage('Please enter a prompt for AI analysis.', 'error');
+                return;
+            }
+
+            aiAnalysisOutput.style.display = 'block';
+            aiAnalysisOutput.innerHTML = '<h3>AI Analysis Results:</h3><p>Running AI analysis... This might take a moment.</p>';
+            displayMessage('Running AI analysis...', 'info');
+
+            try {
+                // --- THIS IS WHERE YOUR REAL GEMINI API CALL LOGIC GOES ---
+                // For now, it's a dummy response.
+                // In the next step, we will update app.py to handle this request
+                // and integrate with the Gemini API.
+                const response = await fetch('/api/ai_query', { // You'll create this endpoint in app.py
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: prompt, api_key: apiKey })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    aiAnalysisOutput.innerHTML = `<h3>AI Analysis Results:</h3><pre style="white-space: pre-wrap;">${data.response || 'No response from AI.'}</pre>`;
+                    displayMessage('AI analysis complete!', 'success');
+                } else {
+                    aiAnalysisOutput.innerHTML = `<h3>AI Analysis Results:</h3><p style="color:red;">Error from AI: ${data.error || 'Unknown error during AI analysis.'}</p>`;
+                    displayMessage(`Error: ${data.error || 'Failed AI analysis.'}`, 'error');
+                }
+
+            } catch (error) {
+                console.error('Error running AI analysis:', error);
+                aiAnalysisOutput.innerHTML = `<h3>AI Analysis Results:</h3><p class="error">Network Error: ${error.message}. Ensure Flask server has /api/ai_query endpoint configured.</p>`;
+                displayMessage(`Network Error: ${error.message}`, 'error');
+            }
+        }
+
+
+        // --- Load Bedrock Content ---
+        async function loadBedrockContent() {
+            const bedrockContentInput = document.getElementById('bedrockContentInput');
+            try {
+                const response = await fetch('/api/bedrock_content');
+                const data = await response.json();
+                if (response.ok) {
+                    bedrockContentInput.value = data.content || '';
+                } else {
+                    console.error('Failed to load bedrock content:', data.error);
+                    bedrockContentInput.value = 'Error loading bedrock content.';
+                }
+            } catch (error) {
+                console.error('Network error loading bedrock content:', error);
+                bedrockContentInput.value = 'Network error loading bedrock content.';
+            }
+        }
+
+        // --- Save Bedrock Content ---
+        async function saveBedrockContent() {
+            const bedrockContent = document.getElementById('bedrockContentInput').value;
+            displayMessage('Saving bedrock content...', 'info');
+
+            try {
+                const response = await fetch('/api/bedrock_content', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content: bedrockContent })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    displayMessage(data.message, 'success');
+                } else {
+                    displayMessage(`Error: ${data.error || 'Failed to save bedrock content.'}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error saving bedrock content:', error);
+                displayMessage(`Network Error: ${error.message}`, 'error');
+            }
         }
 
         // --- Initial Load ---
-        showLibrary('All'); // Load all sources initially
+        document.addEventListener('DOMContentLoaded', () => {
+            showSection('addSourceSection', document.getElementById('addSourceLink'));
+        });
     </script>
 </body>
 </html>
